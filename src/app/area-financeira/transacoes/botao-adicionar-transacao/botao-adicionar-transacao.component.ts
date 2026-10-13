@@ -1,25 +1,53 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, signal, output, input } from '@angular/core';
 import { BotaoComponent } from '../../../compartilhados/botao/botao.component';
 import { ModalComponent } from '../../../compartilhados/modal/modal.component';
+import { FormsModule } from '@angular/forms';
+import { KeyValuePipe } from '@angular/common';
+import { TipoTransacao } from '../../compartilhados/transacao.model';
+import { Transacao } from '../../compartilhados/transacao.model';
+import { Conta } from '../../compartilhados/conta.model';
 
 @Component({
   selector: 'app-botao-adicionar-transacao',
-  imports: [BotaoComponent, ModalComponent],
+  imports: [BotaoComponent, ModalComponent, FormsModule, KeyValuePipe],
   templateUrl: './botao-adicionar-transacao.component.html',
   styleUrl: './botao-adicionar-transacao.component.css'
 })
 export class BotaoAdicionarTransacaoComponent {
 
   modalAberto = signal(false);
-  
-  constructor() {
-    effect(() => {
-      console.log('Modal aberto:', this.modalAberto());
-    });
-  }
+
+  novaTransacaoForm = {
+    nome: '',
+    tipo: '',
+    valor: '',
+    data: '',
+    conta: ''
+  };
+
+  tiposTransacao = TipoTransacao;
+
+  transacaoCriada = output<Transacao>();
+
+  contas = input.required<Conta[]>();
 
   abrirModal() {
     this.modalAberto.set(true);
-}
+  }
+
+  aoSubmeter() {
+   
+    const novaTransacao = new Transacao(
+      this.novaTransacaoForm.nome,
+      this.novaTransacaoForm.tipo as TipoTransacao,
+      Number(this.novaTransacaoForm.valor),
+      this.novaTransacaoForm.data,
+      this.novaTransacaoForm.conta
+    );
+    
+    this.transacaoCriada.emit(novaTransacao);
+    this.modalAberto.set(false);
+
+  }
 
 }
